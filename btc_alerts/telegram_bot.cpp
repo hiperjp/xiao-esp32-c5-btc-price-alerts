@@ -10,6 +10,9 @@ static UniversalTelegramBot bot(TELEGRAM_BOT_TOKEN, client);
 
 void botBegin() {
   client.useBuiltinCACertBundle();
+  // La librería trunca las respuestas en 1500 caracteres por defecto; un mensaje
+  // largo (o con muchos emojis) dejaba getUpdates atascado en esa actualización.
+  bot.maxMessageLength = 16384;
 }
 
 bool botSend(const std::string& text) {
