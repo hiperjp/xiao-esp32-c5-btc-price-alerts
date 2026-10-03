@@ -1,0 +1,10 @@
+# Credenciales
+btc_alerts/secrets.h
+
+# Build
+build/
+test/bin/
+*.o
+
+# macOS
+.DS_Store
