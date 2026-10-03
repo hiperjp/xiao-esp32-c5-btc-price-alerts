@@ -7,7 +7,7 @@ static void test_accepts_integers_and_decimals() {
   CHECK_NEAR(v, 90000);
   CHECK(parsePositiveDecimal("90000.5", v));
   CHECK_NEAR(v, 90000.5);
-  CHECK(parsePositiveDecimal("89950.12000000", v));  // formato de Binance
+  CHECK(parsePositiveDecimal("89950.12000000", v));  // Binance price format
   CHECK_NEAR(v, 89950.12);
   CHECK(parsePositiveDecimal("0.5", v));
   CHECK_NEAR(v, 0.5);
@@ -20,7 +20,7 @@ static void test_rejects_malformed_input() {
     if (parsePositiveDecimal(s, v)) std::printf("  accepted: \"%s\"\n", s);
     CHECK(!parsePositiveDecimal(s, v));
   }
-  CHECK_NEAR(v, 123);  // out no se modifica si falla
+  CHECK_NEAR(v, 123);
 }
 
 static void test_rejects_overflow() {

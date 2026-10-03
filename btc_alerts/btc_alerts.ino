@@ -35,11 +35,14 @@ static bool ensureWifi(unsigned long now) {
   return false;
 }
 
+// Any clock reading before late 2023 means NTP hasn't answered yet.
+static const time_t MIN_SYNCED_EPOCH = 1700000000;
+
 static bool syncTime() {
   configTime(0, 0, NTP_SERVER_1, NTP_SERVER_2);
   unsigned long start = millis();
-  while (time(nullptr) < 1700000000 && millis() - start < NTP_TIMEOUT_MS) delay(200);
-  bool ok = time(nullptr) >= 1700000000;
+  while (time(nullptr) < MIN_SYNCED_EPOCH && millis() - start < NTP_TIMEOUT_MS) delay(200);
+  bool ok = time(nullptr) >= MIN_SYNCED_EPOCH;
   Serial.println(ok ? "[ntp] hora sincronizada" : "[ntp] sin respuesta, reintentando");
   return ok;
 }

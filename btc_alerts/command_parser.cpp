@@ -32,6 +32,7 @@ Command parseCommand(const std::string& text) {
   std::vector<std::string> words = splitWords(text);
   if (words.empty() || words[0][0] != '/') return cmd;
 
+  // Telegram appends "@BotName" to commands picked from the command menu.
   std::string name = toLower(words[0].substr(0, words[0].find('@')));
   if (name == "/status") {
     cmd.type = CommandType::Status;

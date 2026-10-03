@@ -81,9 +81,9 @@ std::string thresholdSetMsg(bool isLow, double value) {
   return "✅ " + name + " fijado en " + formatUsd(value) + " USD";
 }
 
-std::string conflictMsg(bool isLow, double other) {
-  if (isLow) return "❌ El mínimo debe ser menor que el máximo (" + formatUsd(other) + " USD)";
-  return "❌ El máximo debe ser mayor que el mínimo (" + formatUsd(other) + " USD)";
+std::string conflictMsg(bool isLow, double otherThreshold) {
+  if (isLow) return "❌ El mínimo debe ser menor que el máximo (" + formatUsd(otherThreshold) + " USD)";
+  return "❌ El máximo debe ser mayor que el mínimo (" + formatUsd(otherThreshold) + " USD)";
 }
 
 static std::string thresholdLine(const Threshold& t) {

@@ -10,7 +10,7 @@ ARDUINO_LIBS ?= $(HOME)/Documents/Arduino/libraries
 CXX := clang++
 CXXFLAGS := -std=c++17 -Wall -Wextra -I$(SKETCH) -I$(ARDUINO_LIBS)/ArduinoJson/src
 
-# Módulos puros (sin Arduino.h) que se compilan y prueban en el host.
+# Pure modules (no Arduino.h) so the decision logic can be tested on the host.
 PURE_SRC := $(SKETCH)/alert_logic.cpp $(SKETCH)/decimal.cpp $(SKETCH)/command_parser.cpp \
             $(SKETCH)/price_parser.cpp $(SKETCH)/price_health.cpp $(SKETCH)/messages.cpp
 TESTS := alert_logic decimal command_parser price_parser price_health messages

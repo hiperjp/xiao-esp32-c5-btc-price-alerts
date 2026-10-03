@@ -36,7 +36,7 @@ static void test_threshold_confirmation_shows_value() {
   CHECK_STR(thresholdSetMsg(false, 130000), "✅ Máximo fijado en 130,000 USD");
   CHECK_STR(thresholdSetMsg(true, 0), "✅ Mínimo desactivado");
   CHECK_STR(thresholdSetMsg(false, 0), "✅ Máximo desactivado");
-  // "/low 90.000" -> 90: la confirmación deja el error a la vista.
+  // "/low 90.000" parses as 90; the confirmation must expose that.
   CHECK_STR(thresholdSetMsg(true, 90), "✅ Mínimo fijado en 90 USD");
 }
 

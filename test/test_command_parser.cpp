@@ -45,7 +45,7 @@ static void test_invalid_threshold_arguments() {
 }
 
 static void test_dot_thousands_separator_parses_as_decimal() {
-  // "90.000" es un decimal válido (= 90); la confirmación al usuario lo hace evidente.
+  // Accepted as 90 on purpose; the confirmation message makes the mistake visible.
   Command c = parseCommand("/low 90.000");
   CHECK(c.valid);
   CHECK_NEAR(c.value, 90);

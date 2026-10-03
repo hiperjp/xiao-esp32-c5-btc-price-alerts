@@ -7,7 +7,8 @@ static const char* NVS_NAMESPACE = "btcalert";
 
 void loadAlertState(AlertState& state) {
   Preferences prefs;
-  // Si el namespace no existe, begin() falla y los get*() devuelven el valor por defecto.
+  // On first boot the namespace doesn't exist yet: begin() fails and get*() fall
+  // back to the defaults, which is the intended initial state.
   prefs.begin(NVS_NAMESPACE, true);
   state.low.value = prefs.getDouble("low", 0);
   state.low.armed = prefs.getBool("lowArmed", true);

@@ -40,7 +40,7 @@ static void test_low_fires_only_once_while_oscillating() {
 
 static void test_low_rearms_above_margin_and_fires_again() {
   AlertState s = evaluate(withLow(90000), 89950, M).next;
-  s = evaluate(s, 90451, M).next;  // > 90000 * 1.005 = 90450
+  s = evaluate(s, 90451, M).next;  // re-arm point: 90000 * 1.005 = 90450
   CHECK(s.low.armed);
   CHECK(evaluate(s, 89999, M).lowCrossed);
 }
@@ -60,7 +60,7 @@ static void test_high_does_not_fire_below_threshold() {
 
 static void test_high_rearms_below_margin() {
   AlertState s = evaluate(withHigh(130000), 130120, M).next;
-  s = evaluate(s, 129351, M).next;  // 130000 * 0.995 = 129350 -> todavía no
+  s = evaluate(s, 129351, M).next;  // re-arm point: 130000 * 0.995 = 129350
   CHECK(!s.high.armed);
   s = evaluate(s, 129349, M).next;
   CHECK(s.high.armed);
@@ -91,14 +91,14 @@ static void test_commit_rearms_alerts_that_failed_to_send() {
   s.low.value = 90000;
   s.high.value = 130000;
   EvalResult r = evaluate(s, 89000, M);
-  CHECK(commitAlerts(r, false, false).low.armed);   // envío falló -> reintentar
-  CHECK(!commitAlerts(r, true, false).low.armed);   // envío OK -> disparado
-  CHECK(commitAlerts(r, true, false).high.armed);   // high no se cruzó
+  CHECK(commitAlerts(r, false, false).low.armed);
+  CHECK(!commitAlerts(r, true, false).low.armed);
+  CHECK(commitAlerts(r, true, false).high.armed);
 }
 
 static void test_commit_keeps_silent_rearm() {
   AlertState s = evaluate(withLow(90000), 89000, M).next;
-  EvalResult r = evaluate(s, 91000, M);  // rearme, sin alerta
+  EvalResult r = evaluate(s, 91000, M);
   CHECK(commitAlerts(r, false, false).low.armed);
 }
 
@@ -112,7 +112,7 @@ static void test_set_low_arms_and_validates_against_high() {
   CHECK(setLow(s, 130000) == SetResult::Conflict);
   CHECK(setLow(s, 140000) == SetResult::Conflict);
   CHECK_NEAR(s.low.value, 90000);
-  CHECK(setLow(s, 0) == SetResult::Ok);  // desactivar siempre se permite
+  CHECK(setLow(s, 0) == SetResult::Ok);
   CHECK_NEAR(s.low.value, 0);
 }
 
@@ -124,7 +124,7 @@ static void test_set_high_validates_against_low() {
   CHECK_NEAR(s.high.value, 0);
   CHECK(setHigh(s, 130000) == SetResult::Ok);
   CHECK_NEAR(s.high.value, 130000);
-  AlertState t;  // low desactivado -> cualquier high vale
+  AlertState t;
   CHECK(setHigh(t, 5) == SetResult::Ok);
 }
 

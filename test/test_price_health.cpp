@@ -24,9 +24,9 @@ static void test_alert_only_once() {
 
 static void test_survives_millis_overflow() {
   PriceHealth h;
-  h.lastOkMs = 0xFFFFFF00u;                         // justo antes del desborde
-  CHECK(!shouldSendFailAlert(h, 0x00000100u, TEN_MIN));  // pasaron 512 ms
-  CHECK(shouldSendFailAlert(h, TEN_MIN, TEN_MIN));       // pasaron 10 min + 256 ms
+  h.lastOkMs = 0xFFFFFF00u;  // just before millis() rolls over
+  CHECK(!shouldSendFailAlert(h, 0x00000100u, TEN_MIN));  // 512 ms elapsed
+  CHECK(shouldSendFailAlert(h, TEN_MIN, TEN_MIN));       // 10 min + 256 ms elapsed
 }
 
 int main() {
