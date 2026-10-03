@@ -11,8 +11,8 @@ CXX := clang++
 CXXFLAGS := -std=c++17 -Wall -Wextra -I$(SKETCH) -I$(ARDUINO_LIBS)/ArduinoJson/src
 
 # Módulos puros (sin Arduino.h) que se compilan y prueban en el host.
-PURE_SRC := $(SKETCH)/alert_logic.cpp
-TESTS := alert_logic
+PURE_SRC := $(SKETCH)/alert_logic.cpp $(SKETCH)/decimal.cpp $(SKETCH)/command_parser.cpp
+TESTS := alert_logic decimal command_parser
 
 .PHONY: setup test compile flash monitor clean
 
