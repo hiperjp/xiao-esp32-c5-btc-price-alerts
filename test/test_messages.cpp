@@ -25,10 +25,23 @@ static void test_format_duration() {
 static void test_alert_messages_match_spec() {
   CHECK_STR(lowAlertMsg(90000, 89950), "🔻 BTC bajó de 90,000 USD → ahora 89,950 USD");
   CHECK_STR(highAlertMsg(130000, 130120), "🚀 BTC superó 130,000 USD → ahora 130,120 USD");
-  CHECK_STR(onlineMsg(true, 89950.12), "🟢 Online — BTC = 89,950.12 USD");
-  CHECK_STR(onlineMsg(false, 0), "🟢 Online — todavía sin precio de BTC");
+  CHECK_STR(onlineMsg(true, 89950.12, ResetCause::PowerOn),
+            "🟢 Online — BTC = 89,950.12 USD\n🔄 Reinicio: encendido o corte de corriente");
+  CHECK_STR(onlineMsg(false, 0, ResetCause::Brownout),
+            "🟢 Online — todavía sin precio de BTC\n🔄 Reinicio: caída de tensión (brownout)");
   CHECK_STR(priceFailMsg(), "⚠️ No puedo obtener el precio de BTC");
   CHECK_STR(priceRecoveredMsg(90000), "✅ Precio recuperado: 90,000 USD");
+}
+
+static void test_online_names_every_reset_cause() {
+  const char* prefix = "🟢 Online — todavía sin precio de BTC\n🔄 Reinicio: ";
+  CHECK_STR(onlineMsg(false, 0, ResetCause::External), std::string(prefix) + "botón de reset");
+  CHECK_STR(onlineMsg(false, 0, ResetCause::Software), std::string(prefix) + "por software");
+  CHECK_STR(onlineMsg(false, 0, ResetCause::Usb), std::string(prefix) + "por USB");
+  CHECK_STR(onlineMsg(false, 0, ResetCause::Panic), std::string(prefix) + "fallo del firmware (panic)");
+  CHECK_STR(onlineMsg(false, 0, ResetCause::Watchdog), std::string(prefix) + "watchdog (firmware colgado)");
+  CHECK_STR(onlineMsg(false, 0, ResetCause::PowerGlitch), std::string(prefix) + "fallo de alimentación (glitch)");
+  CHECK_STR(onlineMsg(false, 0, ResetCause::Other), std::string(prefix) + "desconocido");
 }
 
 static void test_threshold_confirmation_shows_value() {
@@ -67,12 +80,15 @@ static void test_status_with_price() {
   info.state.high.value = 0;
   info.rssi = -62;
   info.uptimeSec = 183900;
+  info.freeHeapBytes = 186000;
+  info.minFreeHeapBytes = 150500;
   CHECK_STR(statusMsg(info),
             "📊 BTC: 89,950.12 USD (hace 12s)\n"
             "🔻 Mínimo: 90,000 USD (disparado)\n"
             "🚀 Máximo: desactivado\n"
             "📶 WiFi: -62 dBm\n"
-            "⏱ Encendido hace 2d 3h 5m");
+            "⏱ Encendido hace 2d 3h 5m\n"
+            "🧠 Memoria libre: 181 KB (mínimo 146 KB)");
 }
 
 static void test_status_without_price() {
@@ -85,13 +101,15 @@ static void test_status_without_price() {
             "🔻 Mínimo: desactivado\n"
             "🚀 Máximo: 130,000 USD (armado)\n"
             "📶 WiFi: -70 dBm\n"
-            "⏱ Encendido hace 5s");
+            "⏱ Encendido hace 5s\n"
+            "🧠 Memoria libre: 0 KB (mínimo 0 KB)");
 }
 
 int main() {
   RUN(test_format_usd);
   RUN(test_format_duration);
   RUN(test_alert_messages_match_spec);
+  RUN(test_online_names_every_reset_cause);
   RUN(test_threshold_confirmation_shows_value);
   RUN(test_usage_and_conflict);
   RUN(test_help_lists_all_commands);

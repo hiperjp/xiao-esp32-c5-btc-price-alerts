@@ -44,9 +44,25 @@ std::string highAlertMsg(double threshold, double price) {
   return "🚀 BTC superó " + formatUsd(threshold) + " USD → ahora " + formatUsd(price) + " USD";
 }
 
-std::string onlineMsg(bool hasPrice, double price) {
-  if (!hasPrice) return "🟢 Online — todavía sin precio de BTC";
-  return "🟢 Online — BTC = " + formatUsd(price) + " USD";
+static std::string resetCauseText(ResetCause cause) {
+  switch (cause) {
+    case ResetCause::PowerOn: return "encendido o corte de corriente";
+    case ResetCause::External: return "botón de reset";
+    case ResetCause::Software: return "por software";
+    case ResetCause::Usb: return "por USB";
+    case ResetCause::Panic: return "fallo del firmware (panic)";
+    case ResetCause::Watchdog: return "watchdog (firmware colgado)";
+    case ResetCause::Brownout: return "caída de tensión (brownout)";
+    case ResetCause::PowerGlitch: return "fallo de alimentación (glitch)";
+    case ResetCause::Other:
+    default: return "desconocido";
+  }
+}
+
+std::string onlineMsg(bool hasPrice, double price, ResetCause cause) {
+  std::string s = hasPrice ? "🟢 Online — BTC = " + formatUsd(price) + " USD"
+                           : "🟢 Online — todavía sin precio de BTC";
+  return s + "\n🔄 Reinicio: " + resetCauseText(cause);
 }
 
 std::string priceFailMsg() {
@@ -99,5 +115,7 @@ std::string statusMsg(const StatusInfo& info) {
   s += "\n🚀 Máximo: " + thresholdLine(info.state.high);
   s += "\n📶 WiFi: " + std::to_string(info.rssi) + " dBm";
   s += "\n⏱ Encendido hace " + formatDuration(info.uptimeSec);
+  s += "\n🧠 Memoria libre: " + std::to_string(info.freeHeapBytes / 1024) + " KB (mínimo " +
+       std::to_string(info.minFreeHeapBytes / 1024) + " KB)";
   return s;
 }

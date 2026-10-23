@@ -1,4 +1,5 @@
 #include <WiFi.h>
+#include <esp_system.h>
 #include <esp_timer.h>
 #include <time.h>
 
@@ -23,6 +24,23 @@ static unsigned long lastWifiAttemptMs = 0;
 static bool firstPricePoll = true;
 static bool timeSynced = false;
 static bool onlineSent = false;
+static ResetCause resetCause = ResetCause::Other;
+
+static ResetCause readResetCause() {
+  switch (esp_reset_reason()) {
+    case ESP_RST_POWERON: return ResetCause::PowerOn;
+    case ESP_RST_EXT: return ResetCause::External;
+    case ESP_RST_SW: return ResetCause::Software;
+    case ESP_RST_USB: return ResetCause::Usb;
+    case ESP_RST_PANIC: return ResetCause::Panic;
+    case ESP_RST_INT_WDT:
+    case ESP_RST_TASK_WDT:
+    case ESP_RST_WDT: return ResetCause::Watchdog;
+    case ESP_RST_BROWNOUT: return ResetCause::Brownout;
+    case ESP_RST_PWR_GLITCH: return ResetCause::PowerGlitch;
+    default: return ResetCause::Other;
+  }
+}
 
 static bool ensureWifi(unsigned long now) {
   if (WiFi.status() == WL_CONNECTED) return true;
@@ -99,6 +117,8 @@ static std::string handleCommand(const std::string& text) {
       info.state = state;
       info.rssi = WiFi.RSSI();
       info.uptimeSec = static_cast<uint32_t>(esp_timer_get_time() / 1000000ULL);
+      info.freeHeapBytes = esp_get_free_heap_size();
+      info.minFreeHeapBytes = esp_get_minimum_free_heap_size();
       return statusMsg(info);
     }
     case CommandType::Help:
@@ -112,6 +132,8 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
   Serial.println("\n[boot] BTC Price Alerts");
+  resetCause = readResetCause();
+  Serial.printf("[boot] motivo del reinicio: %d\n", static_cast<int>(esp_reset_reason()));
 
   loadAlertState(state);
   Serial.printf("[boot] low=%.2f (%s) high=%.2f (%s)\n",
@@ -152,7 +174,7 @@ void loop() {
     checkPrice(now);
   }
 
-  if (!onlineSent) onlineSent = botSend(onlineMsg(hasPrice, lastPrice));
+  if (!onlineSent) onlineSent = botSend(onlineMsg(hasPrice, lastPrice, resetCause));
 
   if (now - lastBotPollMs >= BOT_POLL_INTERVAL_MS) {
     lastBotPollMs = now;
